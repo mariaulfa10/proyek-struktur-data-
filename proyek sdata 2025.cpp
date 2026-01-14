@@ -1,13 +1,11 @@
 #include <iostream>
 #include <string>
-#include <iomanip>
 #include <ctime>
 using namespace std;
 
-/* =====================================================
-   ARRAY
-   Menyimpan data pasien
-   ===================================================== */
+/* ================================
+   ARRAY – Data Pasien
+   ================================ */
 
 struct BiodataPasien {
     int noantrian;
@@ -20,10 +18,9 @@ BiodataPasien arrpasien[200];
 int pasien = 0;
 int noantrian = 0;
 
-/* =====================================================
-   QUEUE
-   Antrian pasien (FIFO)
-   ===================================================== */
+/* ================================
+   QUEUE – Antrian Pasien (FIFO)
+   ================================ */
 
 int queueAntrian[200];
 int front = 0, rear = -1;
@@ -36,10 +33,9 @@ int dequeue() {
     return queueAntrian[front++];
 }
 
-/* =====================================================
-   STACK
-   Riwayat pasien yang sudah dipanggil (LIFO)
-   ===================================================== */
+/* ================================
+   STACK – Riwayat Pasien (LIFO)
+   ================================ */
 
 int stackRiwayat[200];
 int top = -1;
@@ -48,10 +44,9 @@ void push(int no) {
     stackRiwayat[++top] = no;
 }
 
-/* =====================================================
-   LINKED LIST
-   Penyimpanan data pasien secara dinamis
-   ===================================================== */
+/* ================================
+   LINKED LIST – Data Dinamis
+   ================================ */
 
 struct Node {
     BiodataPasien data;
@@ -67,10 +62,9 @@ void tambahLinkedList(BiodataPasien p) {
     head = baru;
 }
 
-/* =====================================================
-   TREE
-   Struktur poli rumah sakit
-   ===================================================== */
+/* ================================
+   TREE – Struktur Poli
+   ================================ */
 
 struct Poli {
     string nama;
@@ -86,21 +80,21 @@ Poli* buatPoli(string nama) {
     return p;
 }
 
-/* =====================================================
-   FUNGSI JAM & TANGGAL
-   ===================================================== */
+/* ================================
+   JAM & TANGGAL
+   ================================ */
 
 string waktudaftar() {
     time_t now = time(0);
-    tm *ltm = localtime(&now);
-    char buffer[20];
+    tm* ltm = localtime(&now);
+    char buffer[25];
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", ltm);
     return string(buffer);
 }
 
-/* =====================================================
-   PILIHAN PELAYANAN
-   ===================================================== */
+/* ================================
+   PILIH PELAYANAN
+   ================================ */
 
 string pilihPelayanan(int p) {
     switch (p) {
@@ -113,9 +107,9 @@ string pilihPelayanan(int p) {
     }
 }
 
-/* =====================================================
+/* ================================
    FUNGSI UMUM
-   ===================================================== */
+   ================================ */
 
 void tekanEnter() {
     cout << "\nTekan Enter untuk melanjutkan...";
@@ -123,43 +117,42 @@ void tekanEnter() {
     cin.get();
 }
 
-/* =====================================================
+/* ================================
    INPUT PASIEN
-   (ARRAY + QUEUE + LINKED LIST)
-   ===================================================== */
+   ================================ */
 
 void inputPasien() {
     cin.ignore();
-    cout << "Nama Pasien   : ";
+    cout << "Nama Pasien : ";
     getline(cin, arrpasien[pasien].nama);
 
-    cout << "Umur          : ";
+    cout << "Umur        : ";
     cin >> arrpasien[pasien].umur;
 
     cin.ignore();
-    cout << "Alamat        : ";
+    cout << "Alamat      : ";
     getline(cin, arrpasien[pasien].alamat);
 
-    cout << "No Telepon    : ";
+    cout << "No Telepon  : ";
     cin >> arrpasien[pasien].telp;
 
-    cout << "\n=== PILIH JENIS PELAYANAN ===\n";
+    cout << "\nPilih Pelayanan\n";
     cout << "1. Rawat Inap\n";
     cout << "2. Rawat Jalan\n";
     cout << "3. Gawat Darurat\n";
     cout << "4. Radiologi\n";
     cout << "5. Bedah\n";
-    cout << "Masukkan Pilihan (1-5): ";
+    cout << "Pilihan : ";
 
     int p;
     cin >> p;
+
     arrpasien[pasien].pelayanan = pilihPelayanan(p);
-
     arrpasien[pasien].noantrian = ++noantrian;
-    arrpasien[pasien].jamdaftar = waktudaftar(); // ? jam & tanggal
+    arrpasien[pasien].jamdaftar = waktudaftar();
 
-    enqueue(arrpasien[pasien].noantrian);   // QUEUE
-    tambahLinkedList(arrpasien[pasien]);    // LINKED LIST
+    enqueue(arrpasien[pasien].noantrian);
+    tambahLinkedList(arrpasien[pasien]);
 
     pasien++;
 
@@ -167,10 +160,9 @@ void inputPasien() {
     tekanEnter();
 }
 
-/* =====================================================
+/* ================================
    PANGGIL PASIEN
-   (QUEUE + STACK)
-   ===================================================== */
+   ================================ */
 
 void panggilPasien() {
     if (front > rear) {
@@ -179,43 +171,37 @@ void panggilPasien() {
         return;
     }
 
-    int no = dequeue();   // QUEUE
-    push(no);             // STACK
+    int no = dequeue();
+    push(no);
 
     cout << "\nMemanggil Pasien No Antrian : " << no;
     tekanEnter();
 }
 
-/* =====================================================
-   TAMPILKAN DATA PASIEN (ARRAY)
-   ===================================================== */
+/* ================================
+   TAMPILKAN DATA PASIEN
+   ================================ */
 
 void tampilPasien() {
-    cout << "\n================ DATA PASIEN =================\n";
-    cout << left << setw(5) << "No"
-         << setw(15) << "Nama"
-         << setw(18) << "Pelayanan"
-         << setw(20) << "Waktu Daftar" << endl;
-
-    cout << "------------------------------------------------------\n";
+    cout << "\n===== DATA PASIEN =====\n";
 
     for (int i = 0; i < pasien; i++) {
-        cout << left << setw(5) << arrpasien[i].noantrian
-             << setw(15) << arrpasien[i].nama
-             << setw(18) << arrpasien[i].pelayanan
-             << setw(20) << arrpasien[i].jamdaftar << endl;
+        cout << "\nNo Antrian : " << arrpasien[i].noantrian;
+        cout << "\nNama       : " << arrpasien[i].nama;
+        cout << "\nPelayanan  : " << arrpasien[i].pelayanan;
+        cout << "\nWaktu      : " << arrpasien[i].jamdaftar;
+        cout << "\n---------------------------";
     }
 
     tekanEnter();
 }
 
-/* =====================================================
+/* ================================
    MAIN PROGRAM
-   ===================================================== */
+   ================================ */
 
 int main() {
 
-    // TREE � Struktur Poli Rumah Sakit
     Poli* root = buatPoli("Rumah Sakit");
     root->kiri = buatPoli("Poli Umum");
     root->kanan = buatPoli("Poli Spesialis");
@@ -223,9 +209,9 @@ int main() {
     int pilih;
     do {
         system("cls");
-        cout << "=============================================\n";
-        cout << "   SISTEM ANTRIAN RUMAH SAKIT KASIH SAYANG \n";
-        cout << "=============================================\n";
+        cout << "====================================\n";
+        cout << " SISTEM ANTRIAN RUMAH SAKIT\n";
+        cout << "====================================\n";
         cout << "1. Input Pasien\n";
         cout << "2. Panggil Pasien\n";
         cout << "3. Lihat Data Pasien\n";
@@ -237,11 +223,11 @@ int main() {
             case 1: inputPasien(); break;
             case 2: panggilPasien(); break;
             case 3: tampilPasien(); break;
-            case 4: cout << "\nTerima kasih!\n"; break;
+            case 4: cout << "\nTerima kasih 💙\n"; break;
             default: cout << "Menu tidak valid!"; tekanEnter();
         }
+
     } while (pilih != 4);
 
     return 0;
 }
-

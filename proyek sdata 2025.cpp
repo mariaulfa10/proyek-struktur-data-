@@ -223,7 +223,7 @@ int main() {
             case 1: inputPasien(); break;
             case 2: panggilPasien(); break;
             case 3: tampilPasien(); break;
-            case 4: cout << "\nTerima kasih 💙\n"; break;
+            case 4: cout << "\nTerima kasih, semoga lekas sembuh \n"; break;
             default: cout << "Menu tidak valid!"; tekanEnter();
         }
 
@@ -231,3 +231,4 @@ int main() {
 
     return 0;
 }
+

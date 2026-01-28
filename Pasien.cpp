@@ -51,29 +51,18 @@ Pasien* cariPasien(int id) {
     return NULL;
 }
 
-/* ================= QUEUE (ARRAY) ================= */
+/* ================= QUEUE ================= */
 struct Queue {
     int data[100];
     int front, rear;
 
-    Queue() {
-        front = 0;
-        rear = -1;
-    }
+    Queue() { front = 0; rear = -1; }
+    bool kosong() { return front > rear; }
 
-    bool kosong() {
-        return front > rear;
-    }
+    void enqueue(int x) { data[++rear] = x; }
+    int dequeue() { return data[front++]; }
 
-    void enqueue(int x) {
-        data[++rear] = x;
-    }
-
-    int dequeue() {
-        return data[front++];
-    }
-
-    void insertFront(int x) { // penting untuk UNDO
+    void insertFront(int x) {
         for (int i = rear + 1; i > front; i--)
             data[i] = data[i - 1];
         data[front] = x;
@@ -81,52 +70,77 @@ struct Queue {
     }
 } antrean;
 
-/* ================= STACK UNDO (ARRAY) ================= */
+/* ================= STACK UNDO ================= */
 struct Stack {
     int data[100];
     int top;
-
     Stack() { top = -1; }
 
-    void push(int id) {
-        data[++top] = id;
-    }
-
-    int pop() {
-        return data[top--];
-    }
-
-    bool kosong() {
-        return top == -1;
-    }
+    void push(int x) { data[++top] = x; }
+    int pop() { return data[top--]; }
+    bool kosong() { return top == -1; }
 } undoStack;
 
-/* ================= TREE (BST) RIWAYAT ================= */
-struct Node {
+/* ================= BST UNTUK SEARCH RIWAYAT ================= */
+struct NodeBST {
     int id;
-    Node* left;
-    Node* right;
+    NodeBST* left;
+    NodeBST* right;
 };
 
-Node* root = NULL;
+NodeBST* rootBST = NULL;
 
-Node* insertTree(Node* node, int id) {
+NodeBST* insertBST(NodeBST* node, int id) {
     if (!node)
-        return new Node{id, NULL, NULL};
+        return new NodeBST{id, NULL, NULL};
 
     if (id < node->id)
-        node->left = insertTree(node->left, id);
+        node->left = insertBST(node->left, id);
     else
-        node->right = insertTree(node->right, id);
+        node->right = insertBST(node->right, id);
 
     return node;
 }
 
-void tampilTree(Node* node) {
-    if (!node) return;
-    tampilTree(node->left);
-    cout << "Pasien ID " << node->id << " pernah dirawat\n";
-    tampilTree(node->right);
+bool searchBST(NodeBST* node, int id) {
+    if (!node) return false;
+    if (id == node->id) return true;
+    if (id < node->id)
+        return searchBST(node->left, id);
+    else
+        return searchBST(node->right, id);
+}
+
+NodeBST* findMinBST(NodeBST* node) {
+    while (node && node->left)
+        node = node->left;
+    return node;
+}
+
+NodeBST* deleteBST(NodeBST* node, int id) {
+    if (!node) return NULL;
+
+    if (id < node->id)
+        node->left = deleteBST(node->left, id);
+    else if (id > node->id)
+        node->right = deleteBST(node->right, id);
+    else {
+        if (!node->left) {
+            NodeBST* temp = node->right;
+            delete node;
+            return temp;
+        }
+        else if (!node->right) {
+            NodeBST* temp = node->left;
+            delete node;
+            return temp;
+        }
+
+        NodeBST* temp = findMinBST(node->right);
+        node->id = temp->id;
+        node->right = deleteBST(node->right, temp->id);
+    }
+    return node;
 }
 
 /* ================= MAIN ================= */
@@ -136,13 +150,13 @@ int main() {
 
     do {
         system("cls");
-        cout << "=== SISTEM RUMAH SAKIT ===\n";
+        cout << "=== SISTEM RAWAT INAP RS ===\n";
         cout << "1. Tambah Pasien\n";
         cout << "2. Proses Rawat Inap\n";
         cout << "3. Lihat Bed\n";
         cout << "4. Undo\n";
         cout << "5. Lihat Data Pasien\n";
-        cout << "6. Riwayat (Tree)\n";
+        cout << "6. Cari Riwayat (BST)\n";
         cout << "7. Keluar\n";
         cout << "Pilih: ";
         cin >> menu;
@@ -157,8 +171,7 @@ int main() {
             tambahPasien(nama, idCounter);
             antrean.enqueue(idCounter);
 
-            cout << "Pasien ditambahkan (ID "
-                 << idCounter << ")\n";
+            cout << "Pasien ditambahkan (ID " << idCounter << ")\n";
             idCounter++;
         }
 
@@ -169,10 +182,11 @@ int main() {
                 int id = antrean.dequeue();
                 Pasien* p = cariPasien(id);
 
-                cout << "Pasien dengan ID "
-                     << p->id << " ("
-                     << p->nama
-                     << ") sedang memilih bed\n\n";
+                cout << "====================================\n";
+                cout << "Pasien dengan ID " << p->id
+                     << " (" << p->nama
+                     << ") sedang memilih bed\n";
+                cout << "====================================\n\n";
 
                 tampilBed();
 
@@ -181,7 +195,6 @@ int main() {
                 cin >> pilih;
 
                 if (pilih < 1 || pilih > JUMLAH_BED) {
-                    cout << "Bed tidak valid.\n";
                     antrean.insertFront(id);
                 }
                 else if (bedPemesan[pilih - 1] == -1) {
@@ -190,38 +203,31 @@ int main() {
                     p->status = "Dirawat";
 
                     undoStack.push(id);
-                    root = insertTree(root, id);
+                    rootBST = insertBST(rootBST, id);
 
                     cout << "Pasien berhasil dirawat.\n";
                 }
                 else {
-                    cout << "Bed sudah terisi.\n";
                     antrean.insertFront(id);
                 }
             }
         }
 
-        else if (menu == 3) {
-            tampilBed();
-        }
+        else if (menu == 3) tampilBed();
 
         else if (menu == 4) {
-            if (undoStack.kosong()) {
-                cout << "Tidak ada aksi undo.\n";
-            } else {
+            if (!undoStack.kosong()) {
                 int id = undoStack.pop();
                 Pasien* p = cariPasien(id);
 
-                if (p->bed != -1)
-                    bedPemesan[p->bed - 1] = -1;
-
+                bedPemesan[p->bed - 1] = -1;
                 p->bed = -1;
                 p->status = "Menunggu";
 
+                rootBST = deleteBST(rootBST, id);
                 antrean.insertFront(id);
 
-                cout << "UNDO berhasil. Pasien dengan ID "
-                     << id << " kembali ke antrean.\n";
+                cout << "UNDO berhasil.\n";
             }
         }
 
@@ -229,25 +235,32 @@ int main() {
             Pasien* p = head;
             while (p) {
                 cout << "[" << p->id << "] "
-                     << p->nama << " | Bed: ";
-
-                if (p->bed == -1)
-                    cout << "Belum ada";
-                else
-                    cout << p->bed;
-
-                cout << " | Status: "
-                     << p->status << endl;
-
+                     << p->nama << " | Bed: "
+                     << (p->bed == -1 ? 0 : p->bed)
+                     << " | Status: " << p->status << endl;
                 p = p->next;
             }
         }
 
         else if (menu == 6) {
-            if (!root)
-                cout << "Belum ada riwayat.\n";
-            else
-                tampilTree(root);
+            int cariID;
+            cout << "Masukkan ID pasien yang ingin dicari: ";
+            cin >> cariID;
+
+            if (searchBST(rootBST, cariID)) {
+                Pasien* p = cariPasien(cariID);
+                if (p) {
+                    cout << "=== DATA PASIEN DI RIWAYAT ===\n";
+                    cout << "ID     : " << p->id << endl;
+                    cout << "Nama   : " << p->nama << endl;
+                    cout << "Bed    : ";
+                    if (p->bed == -1) cout << "-\n";
+                    else cout << p->bed << endl;
+                    cout << "Status : " << p->status << endl;
+                }
+            } else {
+                cout << "Pasien tidak ditemukan di riwayat.\n";
+            }
         }
 
         system("pause");
@@ -255,4 +268,3 @@ int main() {
 
     return 0;
 }
-

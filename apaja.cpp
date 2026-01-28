@@ -81,61 +81,6 @@ struct Stack {
     bool kosong() { return top == -1; }
 } undoStack;
 
-/* ================= LINKED LIST RIWAYAT ================= */
-struct Riwayat {
-    int id;
-    Riwayat* next;
-};
-
-Riwayat* headRiwayat = NULL;
-
-void tambahRiwayat(int id) {
-    Riwayat* r = new Riwayat{id, NULL};
-    if (!headRiwayat) headRiwayat = r;
-    else {
-        Riwayat* t = headRiwayat;
-        while (t->next) t = t->next;
-        t->next = r;
-    }
-}
-
-void tampilRiwayat() {
-    if (!headRiwayat) {
-        cout << "Belum ada riwayat.\n";
-        return;
-    }
-
-    Riwayat* r = headRiwayat;
-    while (r) {
-        cout << "Pasien ID " << r->id << " pernah dirawat\n";
-        r = r->next;
-    }
-}
-
-void hapusRiwayat(int id) {
-    if (!headRiwayat) return;
-
-    if (headRiwayat->id == id) {
-        Riwayat* temp = headRiwayat;
-        headRiwayat = headRiwayat->next;
-        delete temp;
-        return;
-    }
-
-    Riwayat* prev = headRiwayat;
-    Riwayat* curr = headRiwayat->next;
-
-    while (curr) {
-        if (curr->id == id) {
-            prev->next = curr->next;
-            delete curr;
-            return;
-        }
-        prev = curr;
-        curr = curr->next;
-    }
-}
-
 /* ================= BST UNTUK SEARCH RIWAYAT ================= */
 struct NodeBST {
     int id;
@@ -211,9 +156,8 @@ int main() {
         cout << "3. Lihat Bed\n";
         cout << "4. Undo\n";
         cout << "5. Lihat Data Pasien\n";
-        cout << "6. Riwayat\n";
-        cout << "7. Cari Riwayat (BST)\n";
-        cout << "8. Keluar\n";
+        cout << "6. Cari Riwayat (BST)\n";
+        cout << "7. Keluar\n";
         cout << "Pilih: ";
         cin >> menu;
         system("cls");
@@ -238,7 +182,6 @@ int main() {
                 int id = antrean.dequeue();
                 Pasien* p = cariPasien(id);
 
-                // === TAMPILAN TAMBAHAN SESUAI PERMINTAAN ===
                 cout << "====================================\n";
                 cout << "Pasien dengan ID " << p->id
                      << " (" << p->nama
@@ -260,7 +203,6 @@ int main() {
                     p->status = "Dirawat";
 
                     undoStack.push(id);
-                    tambahRiwayat(id);
                     rootBST = insertBST(rootBST, id);
 
                     cout << "Pasien berhasil dirawat.\n";
@@ -282,7 +224,6 @@ int main() {
                 p->bed = -1;
                 p->status = "Menunggu";
 
-                hapusRiwayat(id);
                 rootBST = deleteBST(rootBST, id);
                 antrean.insertFront(id);
 
@@ -301,9 +242,7 @@ int main() {
             }
         }
 
-        else if (menu == 6) tampilRiwayat();
-
-        else if (menu == 7) {
+        else if (menu == 6) {
             int cariID;
             cout << "Masukkan ID pasien yang ingin dicari: ";
             cin >> cariID;
@@ -325,8 +264,7 @@ int main() {
         }
 
         system("pause");
-    } while (menu != 8);
+    } while (menu != 7);
 
     return 0;
 }
-
